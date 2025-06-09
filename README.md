@@ -1,16 +1,16 @@
-# Qt Template
+# Simple Qt Logger
 
 ## 🚀 [Build Status]
 
 ### 🛠 Build and ✅ Test
 
-[![Linux Build and Test](https://github.com/Dingola/QtTemplate/actions/workflows/build_and_test_linux.yml/badge.svg)](https://github.com/Dingola/QtTemplate/actions/workflows/build_and_test_linux.yml)
-[![macOS Build and Test](https://github.com/Dingola/QtTemplate/actions/workflows/build_and_test_macos.yml/badge.svg)](https://github.com/Dingola/QtTemplate/actions/workflows/build_and_test_macos.yml)
-[![Windows Build and Test](https://github.com/Dingola/QtTemplate/actions/workflows/build_and_test_windows.yml/badge.svg)](https://github.com/Dingola/QtTemplate/actions/workflows/build_and_test_windows.yml)
+[![Linux Build and Test](https://github.com/Dingola/SimpleQtLogger/actions/workflows/build_and_test_linux.yml/badge.svg)](https://github.com/Dingola/SimpleQtLogger/actions/workflows/build_and_test_linux.yml)
+[![macOS Build and Test](https://github.com/Dingola/SimpleQtLogger/actions/workflows/build_and_test_macos.yml/badge.svg)](https://github.com/Dingola/SimpleQtLogger/actions/workflows/build_and_test_macos.yml)
+[![Windows Build and Test](https://github.com/Dingola/SimpleQtLogger/actions/workflows/build_and_test_windows.yml/badge.svg)](https://github.com/Dingola/SimpleQtLogger/actions/workflows/build_and_test_windows.yml)
 
 ### Code Coverage
 
-[![codecov](https://codecov.io/gh/Dingola/QtTemplate/graph/badge.svg?token=2JLLHLTQYN)](https://codecov.io/gh/Dingola/QtTemplate)
+[![codecov](https://codecov.io/gh/Dingola/SimpleQtLogger/graph/badge.svg?token=A0DQTZFNR7)](https://codecov.io/gh/Dingola/SimpleQtLogger)
 
 <br><br>
 
@@ -84,23 +84,20 @@ Once you have generated the required tokens, add them as secrets in your GitHub 
 
 | Graph     | Description                                                                                                                                                                                                                     | Visualization                                                                 |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| **Sunburst** | The inner-most circle represents the entire project. Moving outward are folders, and finally individual files. The size and color of each slice represent the number of statements and the coverage, respectively. | <img src="https://codecov.io/gh/Dingola/QtTemplate/graphs/sunburst.svg?token=2JLLHLTQYN" alt="Sunburst" height="100" width="200"> |
-| **Grid**     | Each block represents a single file in the project. The size and color of each block represent the number of statements and the coverage, respectively.                                                                      | <img src="https://codecov.io/gh/Dingola/QtTemplate/graphs/tree.svg?token=2JLLHLTQYN" alt="Grid" height="100" width="200">         |
-| **Icicle**   | The top section represents the entire project, followed by folders and individual files. The size and color of each slice represent the number of statements and the coverage, respectively.                                 | <img src="https://codecov.io/gh/Dingola/QtTemplate/graphs/icicle.svg?token=2JLLHLTQYN" alt="Icicle" height="150" width="400">     |
+| **Sunburst** | The inner-most circle represents the entire project. Moving outward are folders, and finally individual files. The size and color of each slice represent the number of statements and the coverage, respectively. | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/sunburst.svg?token=A0DQTZFNR7" alt="Sunburst" height="100" width="200"> |
+| **Grid**     | Each block represents a single file in the project. The size and color of each block represent the number of statements and the coverage, respectively.                                                                      | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/tree.svg?token=A0DQTZFNR7" alt="Grid" height="100" width="200">         |
+| **Icicle**   | The top section represents the entire project, followed by folders and individual files. The size and color of each slice represent the number of statements and the coverage, respectively.                                 | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/icicle.svg?token=A0DQTZFNR7" alt="Icicle" height="150" width="400">     |
 
 <br><br>
 
 
 ## [Description]
-This project is a template for creating Qt-based applications. The solution 
-is divided into two parts: the main project and a test project. By default, only the 
-main project is built. The test project can be built if desired, controlled by a CMake 
-boolean variable `<PROJECT_NAME>_BUILD_TEST_PROJECT`. Additionally, the CMake variable 
-`<PROJECT_NAME>_BUILD_TARGET_TYPE` must be set to `static_library` for the test project 
-to be executed.
+SimpleQtLogger is a lightweight C++20/Qt library that extends SimpleCppLogger to provide flexible and minimal logging functionality for modern Qt applications.
 
-The template provides a minimal starting point for Qt applications, supports documentation 
-generation with Doxygen, and includes GitHub workflows (CI builds) for both Linux and Windows.
+The solution is structured into two parts: the main library and an optional test suite. By default, only the main library is built. The test suite can be enabled 
+via the CMake option SimpleQtLogger_BUILD_TEST_PROJECT. To run the test suite, the CMake variable SimpleQtLogger_BUILD_TARGET_TYPE must be set to static_library.
+
+The library supports automatic documentation generation using Doxygen and includes CI workflows for Linux, macOS, and Windows.
 <br><br>
 
 ## [Solution Folder Structure]
@@ -217,8 +214,8 @@ generation with Doxygen, and includes GitHub workflows (CI builds) for both Linu
 
 ### 2) Setting up
 ```
-git clone https://github.com/Dingola/QtTemplate.git
-cd QtTemplate/
+git clone https://github.com/Dingola/SimpleQtLogger.git
+cd SimpleQtLogger/
 ```
 <br>
 
@@ -240,8 +237,8 @@ cmake --build . --config Release
 
 ### 4) Run the project
 ```
-cd QtTemplate/Release/
-./QtTemplate.exe
+cd SimpleQtLogger/Release/
+./SimpleQtLogger.exe
 ```
 <br>
 
@@ -268,29 +265,29 @@ To create an NSIS installer (Windows only), set `BUILD_NSIS_INSTALLER` to `true`
 #### 1. Build the Docker Image
 Build the Docker image using the following command:
 ```
-docker build -t qttemplate-dockerimage .
+docker build -t simpleqtlogger-dockerimage .
 ```
 <br>
 
 #### 2. Ways to Run the Docker Image
 - **Run directly:**
 ```
-docker run qttemplate-dockerimage
+docker run simpleqtlogger-dockerimage
 ```
 - **Start an interactive Bash shell:**
 ```
-docker run -it qttemplate-dockerimage bash
+docker run -it simpleqtlogger-dockerimage bash
 ```
 <br>
 
 #### 3. Run the App or Tests in the Container
 - **Start the app (virtual display with Xvfb):**
 ```
-Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 "./_build_app_release/QT_Project/QtTemplate"
+Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 "./_build_app_release/QT_Project/SimpleQtLogger"
 ```
 - **Run the tests (virtual display with Xvfb):**
 ```
-Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 "./_build_tests_release/QT_Project_Tests/QtTemplate_Tests"
+Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 "./_build_tests_release/QT_Project_Tests/SimpleQtLogger_Tests"
 ```
 <br>
 
@@ -303,7 +300,7 @@ Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 "./_build_tes
    - Alternatively, use the preconfigured `config.xlaunch` file located in the `Configs` folder of this project. Double-click the file to launch VcXsrv with the correct settings.
 3. Start the Docker container:
 ```
-docker run -it --name QtTemplate-Container --network host -e DISPLAY=<IP-ADDRESS>:99.0 -e TERM=xterm-256color -e QT_X11_NO_MITSHM=1 QtTemplate-DockerImage bash
+docker run -it --name SimpleQtLogger-Container --network host -e DISPLAY=<IP-ADDRESS>:99.0 -e TERM=xterm-256color -e QT_X11_NO_MITSHM=1 SimpleQtLogger-DockerImage bash
 ```
 > [!NOTE]
 > Replace `<IP-ADDRESS>` with the host's IP address (e.g., `192.168.1.2`). Do not use `127.0.0.1` or `localhost`.
@@ -311,11 +308,11 @@ docker run -it --name QtTemplate-Container --network host -e DISPLAY=<IP-ADDRESS
 4. Inside the container:
 - **Start the app:**
 ```
-"./_build_app_release/QT_Project/QtTemplate"
+"./_build_app_release/QT_Project/SimpleQtLogger"
 ```
 - **Run the tests:**
 ```
-"./_build_tests_release/QT_Project_Tests/QtTemplate_Tests"
+"./_build_tests_release/QT_Project_Tests/SimpleQtLogger_Tests"
 ```
 <br>
 
@@ -337,7 +334,7 @@ export DISPLAY=192.168.1.2:99.0
 <br><br><br>
 
 ## [Translations]
-The project includes custom targets for updating and compiling translation files. These targets are defined in the CMake file located in `QtTemplate/QT_Project` and can be used to manage translation files located in the `QtTemplate/QT_Project/resources/Translations` directory.
+The project includes custom targets for updating and compiling translation files. These targets are defined in the CMake file located in `SimpleQtLogger/QT_Project` and can be used to manage translation files located in the `SimpleQtLogger/QT_Project/resources/Translations` directory.
 
 > [!NOTE]
 > The translation files are specified in the CMake file. Initially, only `app_de.ts` and `app_en.ts` are included. To support additional languages, you will need to add the corresponding `.ts` files to the CMake configuration.
