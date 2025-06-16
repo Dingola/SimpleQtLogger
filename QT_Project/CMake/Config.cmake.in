@@ -2,7 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 
-set(SIMPLECPPLOGGER_DIR "@SIMPLECPPLOGGER_DIR@")
+set(SimpleCppLogger_DIR "@SIMPLECPPLOGGER_DIR@")
 find_dependency(SimpleCppLogger)
 
 include(${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@.cmake)
