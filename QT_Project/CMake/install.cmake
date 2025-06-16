@@ -1,7 +1,7 @@
 include(GNUInstallDirs)
 
 set(SIMPLECPPLOGGER_GIT_TAG "main")
-set(SIMPLECPPLOGGER_DIR "${THIRD_PARTY_INCLUDE_DIR}/SimpleCppLogger_${COMMONLIB_GIT_TAG}/SimpleCppLogger_install/lib/cmake/SimpleCppLogger")
+set(SIMPLECPPLOGGER_DIR "${THIRD_PARTY_INCLUDE_DIR}/SimpleCppLogger_${SIMPLECPPLOGGER_GIT_TAG}/SimpleCppLogger_install/lib/cmake/SimpleCppLogger")
 
 # Check if the target is a MACOSX_BUNDLE
 if(APPLE AND ${PROJECT_NAME}_IS_BUNDLE)
