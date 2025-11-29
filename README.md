@@ -14,6 +14,46 @@
 
 <br><br>
 
+## 📖 [Table of Contents]
+- [Description](#description)
+- [Code Coverage Graphs](#-code-coverage-graphs)
+- [Tokens for GitHub Actions](#-tokens-for-github-actions)
+- [Solution Folder Structure](#solution-folder-structure)
+- [Configuration](#configuration)
+  - [CMake Options](#cmake-options)
+  - [Environment Variables](#environment-variables)
+- [Supported Platforms](#supported-platforms)
+- [How to Install and Run](#how-to-install-and-run)
+  - [1) Prerequisites](#1-prerequisites)
+  - [2) Setting up](#2-setting-up)
+  - [3) Configuring and Building](#3-configuring-and-building)
+  - [4) Run the project](#4-run-the-project)
+  - [5) Deployment](#5-deployment)
+  - [6) Using Docker](#6-using-docker)
+- [Translations](#translations)
+- [Code Style and Linting](#code-style-and-linting)
+
+<br><br>
+
+## [Description]
+SimpleQtLogger is a lightweight C++20/Qt library that extends SimpleCppLogger to provide flexible and minimal logging functionality for modern Qt applications.
+
+The solution is structured into two parts: the main library and an optional test suite. By default, only the main library is built. The test suite can be enabled 
+via the CMake option SimpleQtLogger_BUILD_TEST_PROJECT. To run the test suite, the CMake variable SimpleQtLogger_BUILD_TARGET_TYPE must be set to static_library.
+
+The library supports automatic documentation generation using Doxygen and includes CI workflows for Linux, macOS, and Windows.
+<br><br>
+
+## 📊 [Code Coverage Graphs]
+
+| Graph     | Description                                                                                                                                                                                                                     | Visualization                                                                 |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| **Sunburst** | The inner-most circle represents the entire project. Moving outward are folders, and finally individual files. The size and color of each slice represent the number of statements and the coverage, respectively. | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/sunburst.svg?token=A0DQTZFNR7" alt="Sunburst" height="100" width="200"> |
+| **Grid**     | Each block represents a single file in the project. The size and color of each block represent the number of statements and the coverage, respectively.                                                                      | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/tree.svg?token=A0DQTZFNR7" alt="Grid" height="100" width="200">         |
+| **Icicle**   | The top section represents the entire project, followed by folders and individual files. The size and color of each slice represent the number of statements and the coverage, respectively.                                 | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/icicle.svg?token=A0DQTZFNR7" alt="Icicle" height="150" width="400">     |
+
+<br><br>
+
 ## 🔐 Tokens for GitHub Actions
 
 Some workflows in this repository require tokens to function correctly. Below are the details for the required tokens and how to configure them.
@@ -58,46 +98,6 @@ Once you have generated the required tokens, add them as secrets in your GitHub 
 
 > **Note**: The `CODECOV_TOKEN` is required for the `build_and_test_linux.yml` workflow to upload coverage reports. The `PAT_TOKEN` is only needed for the disabled workflows.
 
-<br><br>
-
-## 📖 [Table of Contents]
-- [Code Coverage Graphs](#-code-coverage-graphs)
-- [Description](#description)
-- [Solution Folder Structure](#solution-folder-structure)
-- [Configuration](#configuration)
-  - [CMake Options](#cmake-options)
-  - [Environment Variables](#environment-variables)
-- [Supported Platforms](#supported-platforms)
-- [How to Install and Run](#how-to-install-and-run)
-  - [1) Prerequisites](#1-prerequisites)
-  - [2) Setting up](#2-setting-up)
-  - [3) Configuring and Building](#3-configuring-and-building)
-  - [4) Run the project](#4-run-the-project)
-  - [5) Deployment](#5-deployment)
-  - [6) Using Docker](#6-using-docker)
-- [Translations](#translations)
-- [Code Style and Linting](#code-style-and-linting)
-
-<br><br>
-
-## 📊 [Code Coverage Graphs]
-
-| Graph     | Description                                                                                                                                                                                                                     | Visualization                                                                 |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| **Sunburst** | The inner-most circle represents the entire project. Moving outward are folders, and finally individual files. The size and color of each slice represent the number of statements and the coverage, respectively. | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/sunburst.svg?token=A0DQTZFNR7" alt="Sunburst" height="100" width="200"> |
-| **Grid**     | Each block represents a single file in the project. The size and color of each block represent the number of statements and the coverage, respectively.                                                                      | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/tree.svg?token=A0DQTZFNR7" alt="Grid" height="100" width="200">         |
-| **Icicle**   | The top section represents the entire project, followed by folders and individual files. The size and color of each slice represent the number of statements and the coverage, respectively.                                 | <img src="https://codecov.io/gh/Dingola/SimpleQtLogger/graphs/icicle.svg?token=A0DQTZFNR7" alt="Icicle" height="150" width="400">     |
-
-<br><br>
-
-
-## [Description]
-SimpleQtLogger is a lightweight C++20/Qt library that extends SimpleCppLogger to provide flexible and minimal logging functionality for modern Qt applications.
-
-The solution is structured into two parts: the main library and an optional test suite. By default, only the main library is built. The test suite can be enabled 
-via the CMake option SimpleQtLogger_BUILD_TEST_PROJECT. To run the test suite, the CMake variable SimpleQtLogger_BUILD_TARGET_TYPE must be set to static_library.
-
-The library supports automatic documentation generation using Doxygen and includes CI workflows for Linux, macOS, and Windows.
 <br><br>
 
 ## [Solution Folder Structure]
@@ -177,7 +177,7 @@ The library supports automatic documentation generation using Doxygen and includ
 <br>
 
 ### Environment Variables
-* **QT_DIR:** Specifies the path to the Qt 6 installation.
+* **CMAKE_PREFIX_PATH:** Points CMake to the Qt 6 installation (e.g., C:\Qt\6.8.0\msvc2022_64 on Windows, ~/Qt/6.8.0/gcc_64 on Linux, ~/Qt/6.8.0/clang_64 on macOS).
 <br><br><br>
 
 ## [Supported Platforms]
@@ -224,9 +224,9 @@ cd SimpleQtLogger/
 
 ### 3) Configuring and Building
 > [!IMPORTANT]
-> Ensure that the `QT_DIR` environment variable is set, for example: `..\Qt\6.8.0\msvc2022_64`
+> Ensure CMake can find Qt by setting `-DCMAKE_PREFIX_PATH` to your Qt install, for example: `..\Qt\6.8.0\msvc2022_64`
 ```
-cmake -B _build -S . -G "Visual Studio 17 2022" -A x64
+cmake -B _build -S . -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\Qt\6.8.0\msvc2022_64"
 cd _build
 cmake --build . --config Release
 ```
