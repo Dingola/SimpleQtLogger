@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.29.3 FATAL_ERROR)
 
 ############################################
 ### Project Configuration                ###
@@ -16,6 +16,9 @@ include(${CMAKE_SOURCE_DIR}/CMake/SanitizerConfig.cmake)
 ############################################
 ### Global Properties                    ###
 ############################################
+
+# Disable CMake searching for modules
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # Global properties for project organization
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -55,22 +58,15 @@ include_directories(Headers Sources)
 ### Qt6 Configuration                    ###
 ############################################
 
-if ("$ENV{QT6_DIR}" STREQUAL "")
-	set(QT6_DIR "E:\\Qt\\6.8.0\\msvc2022_64\\")
-else()
-	set(QT6_DIR "$ENV{QT6_DIR}")
-endif()
-
-if (EXISTS ${QT6_DIR})
-	set(CMAKE_PREFIX_PATH ${QT6_DIR})
-else()
-	message(WARNING "The specified qt6 path '${QT6_DIR}' does not exist")
-endif()
-
 find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
 qt_standard_project_setup()
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC OFF)
+set(CMAKE_AUTORCC ON)
 qt6_add_resources(RSCS resources.qrc)
 add_custom_target(gen_qrc DEPENDS ${RSCS})
+
+qt6_wrap_ui(UI_HEADERS ${Forms})
 
 ############################################
 ### Translation Configuration            ###
@@ -84,7 +80,7 @@ file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/${TS_DIR})
 
 # Define a custom target for updating translations
 add_custom_target(_translations_update
-    COMMAND ${QT6_DIR}/bin/lupdate ${CMAKE_SOURCE_DIR} -ts ${TS_FILES}
+    COMMAND $<TARGET_FILE:Qt6::lupdate> "${CMAKE_SOURCE_DIR}" -ts ${TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Updating translation files"
 )
@@ -92,7 +88,7 @@ add_custom_target(_translations_update
 # Define a custom target for compiling translations
 add_custom_target(_translations_compile
     DEPENDS ${TS_FILES}
-    COMMAND ${QT6_DIR}/bin/lrelease ${TS_FILES}
+    COMMAND $<TARGET_FILE:Qt6::lrelease> ${TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Compiling translation files"
 )
@@ -186,7 +182,7 @@ message(STATUS "")
 message(STATUS "  Third Party Include Directory:            ${THIRD_PARTY_INCLUDE_DIR}")
 message(STATUS "  ${MAIN_PROJECT_NAME}_BUILD_TARGET_TYPE:  ${${MAIN_PROJECT_NAME}_BUILD_TARGET_TYPE}")
 message(STATUS "  ${doc_sub_target_name}_BUILD_DOC:          ${${doc_sub_target_name}_BUILD_DOC}")
-message(STATUS "  Qt6 Directory (QT6_DIR env):              ${QT6_DIR}")
+message(STATUS "  Qt6 Directory (Qt6_DIR):                  ${Qt6_DIR}")
 message(STATUS "  Translation Files Directory:              ${CMAKE_SOURCE_DIR}/${TS_DIR}")
 message(STATUS "  Translation Files:                        ${TS_FILES}")
 message(STATUS "")
@@ -213,10 +209,12 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Doxygen.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SimpleCppLogger.cmake)
 
 if (WIN32)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set_target_properties(${PROJECT_NAME} PROPERTIES 
-            LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-        )
+    if (MSVC OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set_target_properties(${PROJECT_NAME} PROPERTIES 
+                LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+            )
+        endif()
     endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES 
         WIN32_EXECUTABLE ON
@@ -231,37 +229,50 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-		${Headers}
+        ${Headers}
         ${Sources}
-		${RSCS}
+        ${RSCS}
+        ${UI_HEADERS}
 )
 
 if (WIN32)
-	# windeployqt takes an .exe file or a directory that contains an .exe file 
-	# as an argument, and scans the executable for dependencies
-	#
-	# Link: https://doc.qt.io/qt-6/windows-deployment.html
-	#
-	if (${MAIN_PROJECT_NAME}_BUILD_TARGET_TYPE STREQUAL executable)
-		# Retrieve the absolute path to qmake and then use that path to find
-		# the windeployqt executable
-        find_program(WINDEPLOYQT_ENV_SETUP qtenv2.bat HINTS "${QT6_DIR}/bin")
-        find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT6_DIR}/bin")
+    if (${MAIN_PROJECT_NAME}_BUILD_TARGET_TYPE STREQUAL executable)
+        # Prefer Qt's deploy support if available
+        if (DEFINED Qt6_DIR AND EXISTS "${Qt6_DIR}/Qt6DeploySupport.cmake")
+            include("${Qt6_DIR}/Qt6DeploySupport.cmake")
 
-		# Run windeployqt immediately after build
-		add_custom_command(TARGET ${PROJECT_NAME}
-			POST_BUILD
-			COMMAND "${WINDEPLOYQT_ENV_SETUP}" && "${WINDEPLOYQT_EXECUTABLE}" \"$<TARGET_FILE:${PROJECT_NAME}>\"
-			COMMENT "Running windeployqt..."
-		)
-		
-		# Run windeployqt immediately after build
-		#add_custom_command(TARGET ${PROJECT_NAME}
-		#	POST_BUILD
-		#	COMMAND "${WINDEPLOYQT_ENV_SETUP}" && "${WINDEPLOYQT_EXECUTABLE}" \"$<TARGET_FILE:${PROJECT_NAME}>\"
-		#	COMMENT "Running windeployqt..."
-		#)
-	endif()
+            qt_generate_deploy_app_script(
+                TARGET ${PROJECT_NAME}
+                OUTPUT_SCRIPT deploy_script
+            )
+
+            add_custom_command(TARGET ${PROJECT_NAME}
+                POST_BUILD
+                COMMAND "${CMAKE_COMMAND}" -DQT_DEPLOY_BIN_DIR="$<TARGET_FILE_DIR:${PROJECT_NAME}>" -P "${deploy_script}"
+                COMMENT "Deploying Qt runtime dependencies via Qt6DeploySupport..."
+            )
+        else()
+            message(STATUS "Qt6DeploySupport.cmake not found. Falling back to windeployqt.")
+
+            # Try to locate windeployqt
+            # Qt6_DIR points to <prefix>/lib/cmake/Qt6, go up three levels to get <prefix>
+            get_filename_component(_qt_prefix "${Qt6_DIR}/../../.." ABSOLUTE)
+            find_program(WINDEPLOYQT_EXECUTABLE
+                NAMES windeployqt windeployqt6
+                HINTS "${_qt_prefix}/bin"
+            )
+
+            if (WINDEPLOYQT_EXECUTABLE)
+                add_custom_command(TARGET ${PROJECT_NAME}
+                    POST_BUILD
+                    COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:${PROJECT_NAME}>"
+                    COMMENT "Deploying Qt runtime dependencies via windeployqt..."
+                )
+            else()
+                message(WARNING "windeployqt not found; no automatic deployment will be performed.")
+            endif()
+        endif()
+    endif()
 endif()
 
 ############################################
@@ -270,6 +281,8 @@ endif()
 
 group_files("${Sources}" "Source Files")
 group_files("${Headers}" "Header Files")
+group_files("${Forms}" "UI Files")
+group_files("${UI_HEADERS}" "Auto-Generated UI Headers")
 
 # Specifies include directories to use when compiling a given target
 target_include_directories(${PROJECT_NAME}
