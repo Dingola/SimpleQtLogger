@@ -283,11 +283,11 @@ docker run -it simpleqtlogger-dockerimage bash
 #### 3. Run the App or Tests in the Container
 - **Start the app (virtual display with Xvfb):**
 ```
-Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 "./_build_app_release/QT_Project/SimpleQtLogger"
+Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 && ./_build_app_release/QT_Project/SimpleQtLogger
 ```
 - **Run the tests (virtual display with Xvfb):**
 ```
-Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 "./_build_tests_release/QT_Project_Tests/SimpleQtLogger_Tests"
+Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 && ./_build_tests_release/QT_Project_Tests/SimpleQtLogger_Tests
 ```
 <br>
 
