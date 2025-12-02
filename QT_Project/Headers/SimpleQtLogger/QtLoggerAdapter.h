@@ -50,7 +50,8 @@ inline SIMPLEQTLOGGER_API auto qt_message_handler(QtMsgType type, const QMessage
                                                   const QString& msg) -> void
 {
     SimpleCppLogger::Logger::get_instance().log(map_qt_msg_type(type), msg.toStdString(),
-                                                std::source_location::current());
+                                                context.file, context.line, context.function,
+                                                context.category);
 }
 
 /**

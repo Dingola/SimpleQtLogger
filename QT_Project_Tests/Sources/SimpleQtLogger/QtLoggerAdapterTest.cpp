@@ -42,6 +42,7 @@ TEST_F(QtLoggerAdapterTest, MapQtMsgType)
 
 /**
  * @brief Tests that qt_message_handler forwards messages to the logger.
+ * Uses an empty explicit context to avoid suffix composition.
  */
 TEST_F(QtLoggerAdapterTest, QtMessageHandlerForwardsMessage)
 {
@@ -51,12 +52,13 @@ TEST_F(QtLoggerAdapterTest, QtMessageHandlerForwardsMessage)
             EXPECT_EQ(log_message.get_message(), "Qt test message");
         });
 
-    QMessageLogContext context;
+    QMessageLogContext context(nullptr, 0, nullptr, nullptr);
     qt_message_handler(QtInfoMsg, context, QStringLiteral("Qt test message"));
 }
 
 /**
  * @brief Tests that qt_message_handler handles empty messages.
+ * Uses an empty explicit context to avoid suffix composition.
  */
 TEST_F(QtLoggerAdapterTest, QtMessageHandlerHandlesEmptyMessage)
 {
@@ -65,12 +67,13 @@ TEST_F(QtLoggerAdapterTest, QtMessageHandlerHandlesEmptyMessage)
             EXPECT_EQ(log_message.get_message(), "");
         });
 
-    QMessageLogContext context;
+    QMessageLogContext context(nullptr, 0, nullptr, nullptr);
     qt_message_handler(QtInfoMsg, context, QString());
 }
 
 /**
  * @brief Tests that qt_message_handler handles very long messages.
+ * Uses an empty explicit context to avoid suffix composition.
  */
 TEST_F(QtLoggerAdapterTest, QtMessageHandlerHandlesLongMessage)
 {
@@ -80,7 +83,7 @@ TEST_F(QtLoggerAdapterTest, QtMessageHandlerHandlesLongMessage)
             EXPECT_EQ(log_message.get_message(), long_message);
         });
 
-    QMessageLogContext context;
+    QMessageLogContext context(nullptr, 0, nullptr, nullptr);
     qt_message_handler(QtInfoMsg, context, QString::fromStdString(long_message));
 }
 
@@ -107,10 +110,54 @@ TEST_F(QtLoggerAdapterTest, QtMessageHandlerMapsLogLevels)
                 EXPECT_EQ(log_message.get_level(), expected_level);
             });
 
-        QMessageLogContext context;
+        // Context doesn’t matter for level mapping; keep it empty.
+        QMessageLogContext context(nullptr, 0, nullptr, nullptr);
         qt_message_handler(pair.qt_type, context, QStringLiteral("Level test"));
         ::testing::Mock::VerifyAndClearExpectations(m_mock_appender.get());
     }
+}
+
+/**
+ * @brief Tests that explicit Qt context is composed into the message (all fields).
+ */
+TEST_F(QtLoggerAdapterTest, QtMessageHandlerComposesExplicitContext_AllFields)
+{
+    EXPECT_CALL(*m_mock_appender, internal_append(::testing::_, ::testing::_))
+        .WillOnce([](const LogMessage& log_message, const std::source_location&) {
+            EXPECT_EQ(log_message.get_message(), "Msg - [MyCat] myfile.cpp:123, myFunction");
+        });
+
+    QMessageLogContext context("myfile.cpp", 123, "myFunction", "MyCat");
+    qt_message_handler(QtInfoMsg, context, QStringLiteral("Msg"));
+}
+
+/**
+ * @brief Tests that only category is appended when only category is provided.
+ */
+TEST_F(QtLoggerAdapterTest, QtMessageHandlerComposesExplicitContext_CategoryOnly)
+{
+    EXPECT_CALL(*m_mock_appender, internal_append(::testing::_, ::testing::_))
+        .WillOnce([](const LogMessage& log_message, const std::source_location&) {
+            // Note: trailing space after [MyCat] by formatter contract.
+            EXPECT_EQ(log_message.get_message(), "Msg - [MyCat] ");
+        });
+
+    QMessageLogContext context(nullptr, 0, nullptr, "MyCat");
+    qt_message_handler(QtInfoMsg, context, QStringLiteral("Msg"));
+}
+
+/**
+ * @brief Tests that only function is appended when only function is provided.
+ */
+TEST_F(QtLoggerAdapterTest, QtMessageHandlerComposesExplicitContext_FunctionOnly)
+{
+    EXPECT_CALL(*m_mock_appender, internal_append(::testing::_, ::testing::_))
+        .WillOnce([](const LogMessage& log_message, const std::source_location&) {
+            EXPECT_EQ(log_message.get_message(), "Msg - myFunction");
+        });
+
+    QMessageLogContext context(nullptr, 0, "myFunction", nullptr);
+    qt_message_handler(QtInfoMsg, context, QStringLiteral("Msg"));
 }
 
 /**
