@@ -9,6 +9,14 @@ set(SimpleCppLogger_INCLUDE_DIR ${SimpleCppLogger_INSTALL_ROOT}/${CMAKE_BUILD_TY
 set(SimpleCppLogger_LIBRARY ${SimpleCppLogger_INSTALL_ROOT}/${CMAKE_BUILD_TYPE}/lib/SimpleCppLogger.lib)
 set(SimpleCppLogger_DIR "")
 
+# Dynamically find all installed third-party packages to help find_dependency()
+# matching the pattern: ThirdParty/<Project>_<Tag>/<Target>_install/<Config>
+file(GLOB _installed_third_parties
+    "${THIRD_PARTY_INCLUDE_DIR}/*/*_install/${CMAKE_BUILD_TYPE}"
+    "${THIRD_PARTY_INCLUDE_DIR}/*/*_install"
+)
+list(APPEND CMAKE_PREFIX_PATH ${_installed_third_parties} "${SimpleCppLogger_INSTALL_ROOT}/${CMAKE_BUILD_TYPE}")
+
 find_package(SimpleCppLogger HINTS ${SimpleCppLogger_INSTALL_ROOT}/${CMAKE_BUILD_TYPE}/lib/cmake/SimpleCppLogger NO_DEFAULT_PATHS)
 
 if(SimpleCppLogger_FOUND)
@@ -25,6 +33,13 @@ else()
 		${CMAKE_ARGS}
     )
 	
+    # Re-scan third-party installs after the build to pick up dependencies (CommonLib) that were just installed
+    file(GLOB _installed_third_parties
+        "${THIRD_PARTY_INCLUDE_DIR}/*/*_install/${CMAKE_BUILD_TYPE}"
+        "${THIRD_PARTY_INCLUDE_DIR}/*/*_install"
+    )
+    list(APPEND CMAKE_PREFIX_PATH ${_installed_third_parties} "${SimpleCppLogger_INSTALL_ROOT}/${CMAKE_BUILD_TYPE}")
+
 	find_package(SimpleCppLogger REQUIRED HINTS ${SimpleCppLogger_INSTALL_ROOT}/${CMAKE_BUILD_TYPE}/lib/cmake/SimpleCppLogger NO_DEFAULT_PATHS)
 endif()
 
