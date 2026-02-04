@@ -29,6 +29,13 @@ function (build_third_party_project
 )
 	# Prepare forwardable Qt/CMake settings for the external project
 	set(_forward_args "")
+
+	# Propagate THIRD_PARTY_INCLUDE_DIR to external projects so they can find their dependencies
+	if (DEFINED THIRD_PARTY_INCLUDE_DIR AND NOT THIRD_PARTY_INCLUDE_DIR STREQUAL "")
+		file(TO_CMAKE_PATH "${THIRD_PARTY_INCLUDE_DIR}" _tp_inc_norm)
+		list(APPEND _forward_args "-DTHIRD_PARTY_INCLUDE_DIR:PATH=${_tp_inc_norm}")
+	endif()
+
 	if (DEFINED CMAKE_PREFIX_PATH AND NOT CMAKE_PREFIX_PATH STREQUAL "")
 		# Normalize all prefix entries (avoid backslash escape issues on Windows)
 		set(_norm_prefix_list "")
