@@ -11,6 +11,7 @@ configure_file(Config.h.in Config.h)
 # Include CMake helper scripts
 include(${CMAKE_SOURCE_DIR}/CMake/SourceGroups.cmake)
 include(${CMAKE_SOURCE_DIR}/CMake/BuildThirdPartyProject.cmake)
+include(${CMAKE_SOURCE_DIR}/CMake/IncludeThirdParty.cmake)
 include(${CMAKE_SOURCE_DIR}/CMake/SanitizerConfig.cmake)
 
 ############################################
@@ -64,7 +65,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTORCC ON)
 qt6_add_resources(RSCS resources.qrc)
-add_custom_target(gen_qrc DEPENDS ${RSCS})
+add_custom_target(${PROJECT_NAME}_gen_qrc DEPENDS ${RSCS})
+set_target_properties(${PROJECT_NAME}_gen_qrc PROPERTIES FOLDER "_Tasks")
 
 qt6_wrap_ui(UI_HEADERS ${Forms})
 
@@ -79,19 +81,21 @@ set(TS_FILES ${TS_DIR}/app_de.ts ${TS_DIR}/app_en.ts)
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/${TS_DIR})
 
 # Define a custom target for updating translations
-add_custom_target(_translations_update
+add_custom_target(${PROJECT_NAME}_translations_update
     COMMAND $<TARGET_FILE:Qt6::lupdate> "${CMAKE_SOURCE_DIR}" -ts ${TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Updating translation files"
 )
+set_target_properties(${PROJECT_NAME}_translations_update PROPERTIES FOLDER "_Tasks")
 
 # Define a custom target for compiling translations
-add_custom_target(_translations_compile
+add_custom_target(${PROJECT_NAME}_translations_compile
     DEPENDS ${TS_FILES}
     COMMAND $<TARGET_FILE:Qt6::lrelease> ${TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Compiling translation files"
 )
+set_target_properties(${PROJECT_NAME}_translations_compile PROPERTIES FOLDER "_Tasks")
 
 # Ensure the compiled .qm files are part of the build
 set(QM_FILES "")
@@ -101,7 +105,7 @@ foreach(TS_FILE ${TS_FILES})
 endforeach()
 
 # Ensure the target directory exists before copying
-add_custom_command(TARGET _translations_compile POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME}_translations_compile POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/translations
     COMMAND ${CMAKE_COMMAND} -E copy ${QM_FILES} $<TARGET_FILE_DIR:${PROJECT_NAME}>/translations
 )
